@@ -1,5 +1,5 @@
 {
     "deploy": {
-      "startCommand": "npx serve . -p 8080"
+      "startCommand": "npm start"
     }
   }
