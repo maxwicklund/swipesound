@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SwipeSound — Where Artists Meet Labels</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   ROOT & RESET
+═══════════════════════════════════════════════ */
+:root {
+  --bg: #050508;
+  --bg2: #080810;
+  --card: #0d0d14;
+  --card2: #121220;
+  --border: rgba(255,255,255,0.05);
+  --border2: rgba(255,255,255,0.1);
+  --cyan: #00E5FF;
+  --cyan-dim: rgba(0,229,255,0.06);
+  --cyan-glow: rgba(0,229,255,0.22);
+  --red: #FF2424;
+  --gold: #FFBE00;
+  --silver: #C0CDD8;
+  --diamond: #B8F0FF;
+  --grey: #5a5a70;
+  --grey2: #272738;
+  --text: #EEEEF4;
+  --text2: rgba(238,238,244,0.62);
+  --nav-h: 68px;
+}
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; font-size:16px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+img { max-width: 100%; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--grey2); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════════
+   TYPOGRAPHY
+═══════════════════════════════════════════════ */
+.display { font-family: 'Syne', sans-serif; font-weight: 800; letter-spacing: -1.5px; line-height: 0.95; }
+.mono { font-family: 'Syne Mono', monospace; }
+.label { font-family: 'Syne Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--grey); }
+
+/* ═══════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════ */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-h);
+  display: flex; align-items: center;
+  padding: 0 48px;
+  background: rgba(5,5,8,0.88);
+  backdrop-filter: blur(24px) saturate(1.6);
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.3s;
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -0.5px;
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+.nav-logo-mark {
+  width: 32px; height: 32px; border-radius: 10px;
+  background: var(--cyan); display: flex; align-items: center;
+  justify-content: center;
+}
+.nav-logo-mark svg { width: 18px; height: 18px; fill: #000; }
+.nav-logo span { color: var(--cyan); }
+
+.nav-links {
+  display: flex; align-items: center; gap: 2px;
+  margin: 0 auto; list-style: none;
+}
+.nav-links a {
+  font-size: 14px; font-weight: 500; color: var(--grey);
+  padding: 8px 16px; border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+
+.nav-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.btn-ghost {
+  font-size: 13px; font-weight: 600;
+  padding: 9px 20px; border-radius: 10px;
+  border: 1px solid var(--border2); background: transparent;
+  color: var(--text); transition: all 0.2s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+.btn-primary {
+  font-size: 13px; font-weight: 700;
+  padding: 9px 22px; border-radius: 10px;
+  border: none; background: var(--cyan); color: #000;
+  transition: all 0.2s; letter-spacing: 0.2px;
+}
+.btn-primary:hover { box-shadow: 0 0 28px rgba(0,229,255,0.35); transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: calc(var(--nav-h) + 60px) 48px 80px;
+  position: relative; overflow: hidden;
+  text-align: center;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  overflow: hidden;
+}
+.hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero-grain {
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
+  pointer-events: none; opacity: 0.6;
+}
+.hero-glow {
+  position: absolute;
+  width: 700px; height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-55%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 2; max-width: 880px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.22);
+  border-radius: 100px; padding: 6px 14px;
+  font-family: 'Syne Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  color: var(--cyan); text-transform: uppercase;
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s ease both;
+}
+.hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: pulse 1.5s ease infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+.hero-title {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(52px,7vw,96px);
+  letter-spacing: -3px; line-height: 0.92;
+  margin-bottom: 24px;
+  animation: fadeUp 0.7s 0.05s ease both;
+}
+.hero-title .accent { color: var(--cyan); }
+.hero-title .line2 { color: rgba(238,238,244,0.35); }
+
+.hero-sub {
+  font-size: clamp(16px,2vw,20px);
+  color: var(--text2); max-width: 560px; margin: 0 auto 36px;
+  font-weight: 400; line-height: 1.65;
+  animation: fadeUp 0.7s 0.1s ease both;
+}
+
+.hero-ctas {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin-bottom: 64px;
+  animation: fadeUp 0.7s 0.15s ease both;
+}
+.btn-hero-artist {
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+  padding: 14px 32px; border-radius: 12px; border: none;
+  background: var(--cyan); color: #000; letter-spacing: 0.3px;
+  transition: all 0.22s; display: flex; align-items: center; gap: 8px;
+}
+.btn-hero-artist:hover { box-shadow: 0 0 40px rgba(0,229,255,0.4); transform: translateY(-2px); }
+.btn-hero-label {
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+  padding: 14px 32px; border-radius: 12px;
+  border: 1.5px solid var(--border2); background: rgba(255,255,255,0.03);
+  color: var(--text); transition: all 0.22s;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-hero-label:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.06); }
+
+.hero-stats {
+  display: flex; align-items: center; justify-content: center; gap: 48px;
+  animation: fadeUp 0.7s 0.2s ease both;
+}
+.hero-stat { text-align: center; }
+.hero-stat-num {
+  font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800;
+  letter-spacing: -1px; color: var(--text); margin-bottom: 4px;
+}
+.hero-stat-num span { color: var(--cyan); }
+.hero-stat-lbl { font-family: 'Syne Mono', monospace; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--grey); }
+.hero-stat-sep { width: 1px; height: 36px; background: var(--border2); }
+
+/* Scroll hint */
+.scroll-hint {
+  position: absolute; bottom: 32px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: var(--grey); font-family: 'Syne Mono', monospace;
+  font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
+  animation: fadeUp 1s 0.5s ease both;
+}
+.scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--grey), transparent); animation: scrollPulse 2s ease infinite; }
+@keyframes scrollPulse { 0%,100%{opacity:0.4;} 50%{opacity:1;} }
+
+/* ═══════════════════════════════════════════════
+   SECTION COMMON
+═══════════════════════════════════════════════ */
+.section { padding: 100px 48px; }
+.section-inner { max-width: 1200px; margin: 0 auto; }
+.section-header { text-align: center; margin-bottom: 64px; }
+.section-label { display: inline-block; margin-bottom: 14px; }
+.section-title {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(32px,4vw,54px); letter-spacing: -1.5px; line-height: 1;
+  margin-bottom: 16px;
+}
+.section-title .accent { color: var(--cyan); }
+.section-sub { font-size: 17px; color: var(--text2); max-width: 520px; margin: 0 auto; }
+
+/* ═══════════════════════════════════════════════
+   SPLIT MARQUEE BAND
+═══════════════════════════════════════════════ */
+.marquee-band {
+  overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  padding: 16px 0; background: var(--bg2);
+  display: flex; align-items: center;
+}
+.marquee-track {
+  display: flex; gap: 0; white-space: nowrap;
+  animation: marqueeScroll 28s linear infinite;
+  flex-shrink: 0;
+}
+.marquee-track + .marquee-track { animation-delay: -14s; }
+.marquee-item {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 0 28px;
+  font-family: 'Syne Mono', monospace; font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--grey);
+}
+.marquee-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--cyan); opacity: 0.6; }
+@keyframes marqueeScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+/* ═══════════════════════════════════════════════
+   FEATURES GRID
+═══════════════════════════════════════════════ */
+.features-section { background: var(--bg); }
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.feature-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.feature-card::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: 20px;
+  opacity: 0; transition: opacity 0.3s;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,229,255,0.04), transparent);
+}
+.feature-card:hover { border-color: var(--border2); transform: translateY(-3px); }
+.feature-card:hover::before { opacity: 1; }
+
+.feature-card.wide { grid-column: span 2; }
+.feature-card.tall { padding: 32px; }
+
+.feat-icon {
+  width: 44px; height: 44px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px; font-size: 20px;
+}
+.feat-icon.cyan { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); }
+.feat-icon.gold { background: rgba(255,190,0,0.1); border: 1px solid rgba(255,190,0,0.2); }
+.feat-icon.red { background: rgba(255,36,36,0.1); border: 1px solid rgba(255,36,36,0.2); }
+.feat-icon.silver { background: rgba(192,205,216,0.1); border: 1px solid rgba(192,205,216,0.2); }
+.feat-icon.diamond { background: rgba(184,240,255,0.08); border: 1px solid rgba(184,240,255,0.2); }
+.feat-icon.purple { background: rgba(160,100,255,0.1); border: 1px solid rgba(160,100,255,0.2); }
+
+.feat-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.3px; }
+.feat-desc { font-size: 14px; color: var(--text2); line-height: 1.65; }
+
+/* Feature wide card with mini visual */
+.feat-visual {
+  margin-top: 22px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px;
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.feat-tier-pill {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 12px; border-radius: 100px;
+  font-family: 'Syne Mono', monospace; font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; font-weight: 700;
+}
+.feat-tier-pill.emerging { background: rgba(0,229,255,0.07); border: 1px solid rgba(0,229,255,0.25); color: var(--cyan); }
+.feat-tier-pill.silver { background: rgba(192,205,216,0.07); border: 1px solid rgba(192,205,216,0.3); color: var(--silver); }
+.feat-tier-pill.gold { background: rgba(255,190,0,0.07); border: 1px solid rgba(255,190,0,0.3); color: var(--gold); }
+.feat-tier-pill.diamond { background: rgba(184,240,255,0.07); border: 1px solid rgba(184,240,255,0.3); color: var(--diamond); animation: diamondShim 3s ease infinite; }
+@keyframes diamondShim { 0%,100%{box-shadow:none;} 50%{box-shadow:0 0 12px rgba(184,240,255,0.2);} }
+.tier-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: 0.8; }
+
+/* ═══════════════════════════════════════════════
+   HOW IT WORKS
+═══════════════════════════════════════════════ */
+.how-section { background: var(--bg2); }
+.how-tabs {
+  display: flex; justify-content: center; gap: 8px; margin-bottom: 56px;
+}
+.how-tab {
+  font-family: 'Syne Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; padding: 10px 24px; border-radius: 100px;
+  border: 1px solid var(--border2); background: transparent; color: var(--grey);
+  transition: all 0.2s;
+}
+.how-tab.on { background: var(--cyan); color: #000; border-color: var(--cyan); font-weight: 700; }
+.how-tab:hover:not(.on) { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+.how-steps { display: none; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.how-steps.active { display: grid; }
+.how-step {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 18px; padding: 28px 22px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.2s;
+}
+.how-step:hover { border-color: var(--border2); }
+.step-num {
+  font-family: 'Syne', sans-serif; font-size: 56px; font-weight: 800;
+  letter-spacing: -3px; line-height: 1; color: rgba(255,255,255,0.04);
+  position: absolute; top: 12px; right: 16px;
+  pointer-events: none;
+}
+.step-icon { font-size: 28px; margin-bottom: 16px; }
+.step-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.2px; }
+.step-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.step-connector {
+  position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+  width: 20px; height: 2px; background: var(--border2);
+}
+
+/* ═══════════════════════════════════════════════
+   LEADERBOARD PREVIEW
+═══════════════════════════════════════════════ */
+.lb-section { background: var(--bg); }
+.lb-preview-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.lb-col { background: var(--card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+.lb-col-header {
+  padding: 18px 20px; display: flex; align-items: center;
+  gap: 10px; border-bottom: 1px solid var(--border);
+}
+.lb-col-icon { font-size: 20px; }
+.lb-col-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
+.lb-col-title.diamond { color: var(--diamond); }
+.lb-col-title.gold { color: var(--gold); }
+.lb-col-title.silver { color: var(--silver); }
+.lb-col-count { font-family: 'Syne Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--grey); margin-left: auto; text-transform: uppercase; }
+
+.lb-track-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px; border-bottom: 1px solid var(--border);
+  transition: background 0.2s; cursor: pointer;
+}
+.lb-track-row:last-child { border-bottom: none; }
+.lb-track-row:hover { background: rgba(255,255,255,0.025); }
+.lb-tr-rank { font-family: 'Syne Mono', monospace; font-size: 11px; font-weight: 700; width: 22px; flex-shrink: 0; }
+.lb-tr-ava { width: 36px; height: 36px; border-radius: 50%; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; border: 1.5px solid transparent; }
+.lb-tr-ava.diamond { border-color: rgba(184,240,255,0.3); }
+.lb-tr-ava.gold { border-color: rgba(255,190,0,0.35); }
+.lb-tr-ava.silver { border-color: rgba(192,205,216,0.25); }
+.lb-tr-info { flex: 1; min-width: 0; }
+.lb-tr-track { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+.lb-tr-artist { font-family: 'Syne Mono', monospace; font-size: 9px; color: var(--grey); letter-spacing: 0.5px; }
+.lb-tr-fires { font-size: 12px; font-weight: 800; color: var(--red); white-space: nowrap; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════
+   FOR ARTISTS / FOR LABELS SPLIT
+═══════════════════════════════════════════════ */
+.split-section { padding: 80px 48px; }
+.split-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.split-panel {
+  border-radius: 24px; padding: 48px 40px;
+  position: relative; overflow: hidden;
+}
+.split-panel.artist-panel {
+  background: linear-gradient(135deg, rgba(0,229,255,0.07) 0%, transparent 60%), var(--card);
+  border: 1px solid rgba(0,229,255,0.18);
+}
+.split-panel.label-panel {
+  background: linear-gradient(135deg, rgba(255,190,0,0.07) 0%, transparent 60%), var(--card);
+  border: 1px solid rgba(255,190,0,0.18);
+}
+.split-panel-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Syne Mono', monospace; font-size: 9px; letter-spacing: 2.5px;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 100px;
+  margin-bottom: 20px;
+}
+.artist-tag { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3); color: var(--cyan); }
+.label-tag { background: rgba(255,190,0,0.1); border: 1px solid rgba(255,190,0,0.3); color: var(--gold); }
+.split-title { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 12px; }
+.split-desc { font-size: 15px; color: var(--text2); line-height: 1.7; margin-bottom: 28px; }
+.split-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+.split-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text2); }
+.split-check { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; margin-top: 2px; }
+.artist-check { background: rgba(0,229,255,0.15); color: var(--cyan); }
+.label-check { background: rgba(255,190,0,0.15); color: var(--gold); }
+.btn-artist { font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:12px 28px;border-radius:10px;border:none;background:var(--cyan);color:#000;transition:all 0.2s;letter-spacing:0.2px; }
+.btn-artist:hover { box-shadow:0 0 28px rgba(0,229,255,0.35);transform:translateY(-1px); }
+.btn-label { font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:12px 28px;border-radius:10px;border:none;background:var(--gold);color:#000;transition:all 0.2s;letter-spacing:0.2px; }
+.btn-label:hover { box-shadow:0 0 28px rgba(255,190,0,0.35);transform:translateY(-1px); }
+
+/* ═══════════════════════════════════════════════
+   PRICING
+═══════════════════════════════════════════════ */
+.pricing-section { background: var(--bg2); padding: 100px 48px; }
+.pricing-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; max-width: 1200px; margin: 0 auto; }
+.price-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px 24px;
+  display: flex; flex-direction: column;
+  transition: all 0.3s; position: relative; overflow: hidden;
+}
+.price-card.featured {
+  border-color: rgba(0,229,255,0.35);
+  background: linear-gradient(160deg, rgba(0,229,255,0.05), var(--card));
+}
+.price-card:hover { transform: translateY(-4px); border-color: var(--border2); }
+.price-card.featured:hover { box-shadow: 0 0 40px rgba(0,229,255,0.12); }
+.price-badge {
+  position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+  background: var(--cyan); color: #000;
+  font-family: 'Syne Mono', monospace; font-size: 8px; letter-spacing: 2px;
+  text-transform: uppercase; font-weight: 700;
+  padding: 4px 14px; border-radius: 0 0 10px 10px;
+}
+.price-tier { font-family: 'Syne Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); margin-bottom: 8px; }
+.price-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.4px; }
+.price-amount { display: flex; align-items: flex-end; gap: 4px; margin-bottom: 6px; }
+.price-num { font-family: 'Syne', sans-serif; font-size: 42px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+.price-per { font-size: 13px; color: var(--grey); margin-bottom: 6px; }
+.price-desc { font-size: 12px; color: var(--text2); margin-bottom: 24px; line-height: 1.5; }
+.price-divider { height: 1px; background: var(--border); margin-bottom: 20px; }
+.price-features { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 28px; flex: 1; }
+.price-features li { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--text2); }
+.pf-check { color: var(--cyan); flex-shrink: 0; font-size: 13px; margin-top: 1px; }
+.pf-dash { color: var(--grey2); flex-shrink: 0; }
+.btn-price {
+  width: 100%; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  padding: 12px; border-radius: 10px; border: none; transition: all 0.2s;
+}
+.btn-price.primary { background: var(--cyan); color: #000; }
+.btn-price.primary:hover { box-shadow: 0 0 24px rgba(0,229,255,0.3); }
+.btn-price.outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+.btn-price.outline:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.04); }
+
+/* ═══════════════════════════════════════════════
+   TESTIMONIALS / SOCIAL PROOF
+═══════════════════════════════════════════════ */
+.testimonial-section { padding: 80px 48px; background: var(--bg); }
+.testimonial-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; max-width: 1200px; margin: 0 auto; }
+.testimonial-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 18px; padding: 24px;
+  transition: border-color 0.2s;
+}
+.testimonial-card:hover { border-color: var(--border2); }
+.testi-quote { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 20px; position: relative; }
+.testi-quote::before { content: '"'; font-size: 48px; font-family: 'Syne',sans-serif; font-weight: 800; color: rgba(0,229,255,0.12); line-height: 0.8; display: block; margin-bottom: 10px; }
+.testi-author { display: flex; align-items: center; gap: 10px; }
+.testi-ava { width: 38px; height: 38px; border-radius: 50%; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.testi-name { font-size: 13px; font-weight: 700; margin-bottom: 1px; }
+.testi-role { font-family: 'Syne Mono', monospace; font-size: 9px; color: var(--grey); letter-spacing: 1px; }
+.testi-badge { margin-left: auto; flex-shrink: 0; }
+.testi-badge span {
+  font-family: 'Syne Mono', monospace; font-size: 8px; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 100px;
+}
+.testi-badge.artist span { background: rgba(0,229,255,0.1); color: var(--cyan); border: 1px solid rgba(0,229,255,0.2); }
+.testi-badge.label span { background: rgba(255,190,0,0.1); color: var(--gold); border: 1px solid rgba(255,190,0,0.2); }
+
+/* ═══════════════════════════════════════════════
+   CTA STRIP
+═══════════════════════════════════════════════ */
+.cta-strip {
+  margin: 0 48px 80px;
+  background: linear-gradient(120deg, rgba(0,229,255,0.08), rgba(0,229,255,0.03) 50%, rgba(0,180,255,0.06));
+  border: 1px solid rgba(0,229,255,0.22);
+  border-radius: 24px; padding: 56px 64px;
+  display: flex; align-items: center; justify-content: space-between; gap: 40px;
+  position: relative; overflow: hidden;
+}
+.cta-glow { position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%); right: -100px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.cta-text { position: relative; z-index: 1; }
+.cta-title { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+.cta-sub { font-size: 16px; color: var(--text2); }
+.cta-btns { display: flex; gap: 10px; flex-shrink: 0; position: relative; z-index: 1; }
+
+/* ═══════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════ */
+.footer {
+  background: var(--bg2); border-top: 1px solid var(--border);
+  padding: 60px 48px 32px;
+}
+.footer-top {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px; max-width: 1200px; margin: 0 auto 48px;
+}
+.footer-brand { }
+.footer-logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.footer-logo span { color: var(--cyan); }
+.footer-tagline { font-size: 13px; color: var(--text2); line-height: 1.6; max-width: 260px; margin-bottom: 20px; }
+.footer-socials { display: flex; gap: 8px; }
+.social-btn { width: 34px; height: 34px; border-radius: 9px; background: var(--card2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; }
+.social-btn:hover { border-color: var(--border2); background: rgba(255,255,255,0.05); }
+
+.footer-col h4 { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.2px; }
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.footer-col ul li a { font-size: 13px; color: var(--text2); transition: color 0.2s; }
+.footer-col ul li a:hover { color: var(--text); }
+
+.footer-bottom {
+  max-width: 1200px; margin: 0 auto;
+  padding-top: 24px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-copy { font-size: 12px; color: var(--grey); }
+.footer-legal { display: flex; gap: 20px; }
+.footer-legal a { font-size: 12px; color: var(--grey); transition: color 0.2s; }
+.footer-legal a:hover { color: var(--text2); }
+
+/* ═══════════════════════════════════════════════
+   AUTH MODALS
+═══════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(0,0,0,0.88); backdrop-filter: blur(24px) saturate(0.7);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--card); border: 1px solid var(--border2);
+  border-radius: 24px; width: 100%; max-width: 480px;
+  padding: 0; overflow: hidden;
+  transform: translateY(24px) scale(0.97);
+  transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1);
+}
+.modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+.modal-header {
+  padding: 28px 32px 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.modal-logo { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -0.4px; }
+.modal-logo span { color: var(--cyan); }
+.modal-x { width: 30px; height: 30px; border-radius: 50%; background: var(--card2); border: 1px solid var(--border); color: var(--grey); font-size: 14px; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
+.modal-x:hover { color: var(--text); }
+
+.modal-body { padding: 24px 32px 32px; }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 6px; }
+.modal-sub { font-size: 14px; color: var(--text2); margin-bottom: 28px; }
+
+/* Account type selector */
+.acct-type-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+.acct-type {
+  background: var(--card2); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 14px 16px; cursor: pointer;
+  transition: all 0.2s; display: flex; flex-direction: column; gap: 5px;
+}
+.acct-type:hover { border-color: var(--border2); }
+.acct-type.sel { border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.06); }
+.acct-type.sel.label-type { border-color: rgba(255,190,0,0.4); background: rgba(255,190,0,0.06); }
+.acct-type-icon { font-size: 22px; margin-bottom: 3px; }
+.acct-type-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+.acct-type-desc { font-size: 11px; color: var(--text2); }
+.acct-check { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--border2); margin-left: auto; transition: all 0.2s; }
+.acct-type.sel .acct-check { background: var(--cyan); border-color: var(--cyan); }
+.acct-type.sel.label-type .acct-check { background: var(--gold); border-color: var(--gold); }
+
+/* Form */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-family: 'Syne Mono', monospace; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); margin-bottom: 6px; }
+.form-input {
+  width: 100%; background: var(--card2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 11px 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+  outline: none; transition: border-color 0.2s;
+}
+.form-input:focus { border-color: rgba(0,229,255,0.35); }
+.form-input::placeholder { color: var(--grey2); }
+.form-divider {
+  display: flex; align-items: center; gap: 12px; margin: 20px 0;
+  font-family: 'Syne Mono', monospace; font-size: 9px; letter-spacing: 1px;
+  color: var(--grey); text-transform: uppercase;
+}
+.form-divider::before,.form-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.btn-auth {
+  width: 100%; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+  padding: 13px; border-radius: 10px; border: none;
+  background: var(--cyan); color: #000; transition: all 0.2s; letter-spacing: 0.3px;
+}
+.btn-auth:hover { box-shadow: 0 0 28px rgba(0,229,255,0.3); }
+.btn-auth.gold { background: var(--gold); }
+.btn-auth.gold:hover { box-shadow: 0 0 28px rgba(255,190,0,0.3); }
+
+.auth-footer-text { font-size: 13px; color: var(--text2); text-align: center; margin-top: 16px; }
+.auth-footer-text a { color: var(--cyan); font-weight: 600; transition: color 0.2s; }
+.auth-footer-text a:hover { color: #fff; }
+
+.oauth-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+  padding: 11px 14px; border-radius: 10px; transition: all 0.2s;
+  background: var(--card2); border: 1px solid var(--border2); color: var(--text);
+  margin-bottom: 10px;
+}
+.oauth-btn:hover { border-color: rgba(255,255,255,0.22); background: rgba(255,255,255,0.05); }
+
+/* Password strength */
+.pwd-strength { height: 3px; border-radius: 2px; margin-top: 6px; background: var(--card2); overflow: hidden; }
+.pwd-strength-bar { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; }
+
+/* Genre select in signup */
+.genre-select-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.genre-sel-pill {
+  font-family: 'Syne Mono', monospace; font-size: 8px; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 5px 10px; border-radius: 100px;
+  border: 1px solid var(--border); color: var(--grey); cursor: pointer; transition: all 0.2s;
+}
+.genre-sel-pill.on { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.07); }
+
+/* ═══════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  opacity: 0; transform: translateY(22px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+     NAV
+════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+    </div>
+    Swipe<span>Sound</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#charts">Charts</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#artists">For Artists</a></li>
+    <li><a href="#labels">For Labels</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn-ghost" onclick="openLogin()">Sign In</button>
+    <button class="btn-primary" onclick="openSignup()">Get Started Free</button>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════
+     HERO
+════════════════════════════════ -->
+<section class="hero" id="home">
+  <div class="hero-bg">
+    <canvas class="hero-canvas" id="heroCanvas"></canvas>
+    <div class="hero-grain"></div>
+    <div class="hero-glow"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      Now Live · LA, NYC, Miami · Join the Movement
+    </div>
+    <h1 class="hero-title display">
+      The Platform<br>
+      <span class="accent">Artists &amp; Labels</span><br>
+      <span class="line2">Actually Need</span>
+    </h1>
+    <p class="hero-sub">
+      Stop shouting into the algorithm. SwipeSound connects unsigned artists directly with labels, A&Rs, and DJs — based on sound quality, not virality.
+    </p>
+    <div class="hero-ctas">
+      <button class="btn-hero-artist" onclick="openSignup('artist')">
+        <span>🎤</span> I'm an Artist
+      </button>
+      <button class="btn-hero-label" onclick="openSignup('label')">
+        <span>🏷️</span> I'm a Label / A&R
+      </button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">12<span>K+</span></div>
+        <div class="hero-stat-lbl">Artists</div>
+      </div>
+      <div class="hero-stat-sep"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">340<span>+</span></div>
+        <div class="hero-stat-lbl">Labels & A&Rs</div>
+      </div>
+      <div class="hero-stat-sep"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">4.8<span>M</span></div>
+        <div class="hero-stat-lbl">Fires Given</div>
+      </div>
+      <div class="hero-stat-sep"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">820<span></span></div>
+        <div class="hero-stat-lbl">Deals Made</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll to explore
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-band" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-item"><span class="marquee-dot"></span>Deep House</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Afrobeats</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Hip Hop</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>R&B</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Techno</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>House</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Electronic</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Trap</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Drill</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Indie</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Pop</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Soul</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Jazz</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Funk</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Deep House</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Afrobeats</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Hip Hop</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>R&B</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Techno</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>House</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Electronic</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Trap</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Drill</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Indie</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Pop</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Soul</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Jazz</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Funk</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     FEATURES
+════════════════════════════════ -->
+<section class="section features-section" id="features">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label label">Why SwipeSound</div>
+      <h2 class="section-title">Built for the <span class="accent">music industry</span>,<br>not the algorithm</h2>
+      <p class="section-sub">Every feature exists for one reason: get the right music to the right ears, faster.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feat-icon cyan">🔥</div>
+        <div class="feat-title">Heat Score Algorithm</div>
+        <div class="feat-desc">Our proprietary Heat Score weighs fires, replays, saves, and professional engagement — not raw follower counts. Quality rises to the top.</div>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feat-icon gold">🎚️</div>
+        <div class="feat-title">30-Second Clip System</div>
+        <div class="feat-desc">Artists choose their best 30 seconds. A&Rs make fast decisions. No full-track commitments needed until the match is mutual.</div>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feat-icon red">🔒</div>
+        <div class="feat-title">Intent-Based Matching</div>
+        <div class="feat-desc">DMs only unlock when both sides fire. No cold emails. No spam. Pure signal. Artists never get flooded with unsolicited messages.</div>
+      </div>
+
+      <div class="feature-card wide reveal">
+        <div class="feat-icon diamond">💎</div>
+        <div class="feat-title">4-Tier Heat System</div>
+        <div class="feat-desc">Tracks climb from Emerging → Silver → Gold → Diamond based on industry engagement. The higher the tier, the bigger the exposure. Labels see Diamond first, discover Silver gems too.</div>
+        <div class="feat-visual">
+          <div class="feat-tier-pill emerging"><div class="tier-dot"></div>Emerging</div>
+          <div class="feat-tier-pill silver"><div class="tier-dot"></div>Silver</div>
+          <div class="feat-tier-pill gold"><div class="tier-dot"></div>Gold</div>
+          <div class="feat-tier-pill diamond"><div class="tier-dot"></div>Diamond</div>
+        </div>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feat-icon purple">📊</div>
+        <div class="feat-title">Genre Leaderboards</div>
+        <div class="feat-desc">Per-genre charts updated in real time. House, Techno, Afrobeats, Hip Hop, R&B — every genre has its own competitive ladder.</div>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feat-icon cyan">🎯</div>
+        <div class="feat-title">A&R Discovery Tools</div>
+        <div class="feat-desc">Labels filter by genre, BPM, region, heat tier, release status, and version type. Find exactly who you're looking for in minutes.</div>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feat-icon silver">🤝</div>
+        <div class="feat-title">Contact Request System</div>
+        <div class="feat-desc">Artists choose who reaches out. Send a contact request, artist accepts or declines. No unsolicited DMs ever. Full control stays with the creator.</div>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feat-icon gold">📥</div>
+        <div class="feat-title">Controlled Downloads</div>
+        <div class="feat-desc">Artists set download access: Everyone, Labels Only, or Verified A&R. DJs can download stems and full tracks — only with permission.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     HOW IT WORKS
+════════════════════════════════ -->
+<section class="section how-section" id="how">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label label">The Process</div>
+      <h2 class="section-title">How it <span class="accent">works</span></h2>
+      <p class="section-sub">Different paths for artists and labels. One platform that connects them.</p>
+    </div>
+
+    <div class="how-tabs reveal">
+      <button class="how-tab on" onclick="switchHow(this,'artist-steps')">🎤 For Artists</button>
+      <button class="how-tab" onclick="switchHow(this,'label-steps')">🏷️ For Labels & A&Rs</button>
+      <button class="how-tab" onclick="switchHow(this,'dj-steps')">🎧 For DJs</button>
+    </div>
+
+    <div class="how-steps active" id="artist-steps">
+      <div class="how-step reveal">
+        <div class="step-num">01</div>
+        <div class="step-icon">🎤</div>
+        <div class="step-title">Create Your Profile</div>
+        <div class="step-desc">Build your artist page with a bio, press shot, genre tags, social links, and location. First impression locked in.</div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">02</div>
+        <div class="step-icon">🎵</div>
+        <div class="step-title">Upload & Trim</div>
+        <div class="step-desc">Upload MP3, WAV, or FLAC. Use our trimmer to select the best 30 seconds. Choose your version type and set BPM.</div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">03</div>
+        <div class="step-icon">🔥</div>
+        <div class="step-title">Collect Fires</div>
+        <div class="step-desc">Labels, A&Rs, and DJs fire your tracks. Each fire pushes you up the leaderboard and raises your Heat Score.</div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">04</div>
+        <div class="step-icon">💬</div>
+        <div class="step-title">Get Matched</div>
+        <div class="step-desc">When a label fires your track and you fire back, you're matched. Accept their contact request and connect directly.</div>
+      </div>
+    </div>
+
+    <div class="how-steps" id="label-steps">
+      <div class="how-step reveal">
+        <div class="step-num">01</div>
+        <div class="step-icon">🏷️</div>
+        <div class="step-title">Verify Your Label</div>
+        <div class="step-desc">Apply for Label or Verified A&R status. Access premium discovery tools and exclusive artist tiers once approved.</div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">02</div>
+        <div class="step-icon">🔍</div>
+        <div class="step-title">Filter & Discover</div>
+        <div class="step-desc">Filter by genre, BPM range, heat tier, region, and release status. Our algorithm serves you qualified tracks first.</div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">03</div>
+        <div class="step-icon">⭐</div>
+        <div class="step-title">Fire & Super-Fire</div>
+        <div class="step-desc">Fire tracks you love. Super-fire the ones you're serious about. Artists get notified and you jump to the top of their queue.</div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">04</div>
+        <div class="step-icon">🤝</div>
+        <div class="step-title">Connect Directly</div>
+        <div class="step-desc">Send a contact request. Artist accepts. You're connected. Download full tracks and negotiate directly — no middlemen.</div>
+      </div>
+    </div>
+
+    <div class="how-steps" id="dj-steps">
+      <div class="how-step reveal">
+        <div class="step-num">01</div>
+        <div class="step-icon">🎧</div>
+        <div class="step-title">DJ Account</div>
+        <div class="step-desc">Sign up as a DJ. Access the full library of tracks, sorted by BPM, genre, and heat score — built for set planning.</div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">02</div>
+        <div class="step-icon">📊</div>
+        <div class="step-title">Browse Charts</div>
+        <div class="step-desc">The leaderboard is your crate. Check the Diamond and Gold charts first for what's trending in the underground scene.</div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">03</div>
+        <div class="step-icon">📥</div>
+        <div class="step-title">Download Exclusives</div>
+        <div class="step-desc">Artists who enable DJ downloads let you pull full tracks directly. No more begging for promos on SoundCloud.</div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">04</div>
+        <div class="step-icon">🔊</div>
+        <div class="step-title">Play & Support</div>
+        <div class="step-desc">Fire the tracks you play in your sets. Your fires carry extra weight as a verified DJ and push artists up the leaderboard.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     LEADERBOARD PREVIEW
+════════════════════════════════ -->
+<section class="section lb-section" id="charts">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label label">Live Charts</div>
+      <h2 class="section-title">Real-time <span class="accent">leaderboards</span></h2>
+      <p class="section-sub">The heat score never lies. Top tracks across every tier, updated constantly.</p>
+    </div>
+
+    <div class="lb-preview-grid reveal">
+      <!-- Diamond -->
+      <div class="lb-col">
+        <div class="lb-col-header">
+          <div class="lb-col-icon">💎</div>
+          <div class="lb-col-title diamond">Diamond</div>
+          <div class="lb-col-count">Top 5</div>
+        </div>
+        <div class="lb-track-row" onclick="showToast('▶ Parallax — MIRA SOL')"><span class="lb-tr-rank" style="color:var(--cyan)">🥇</span><div class="lb-tr-ava diamond">🌙</div><div class="lb-tr-info"><div class="lb-tr-track">Parallax</div><div class="lb-tr-artist">MIRA SOL</div></div><div class="lb-tr-fires">9.2K 🔥</div></div>
+        <div class="lb-track-row" onclick="showToast('▶ Neon Fauna — KAI VOSS')"><span class="lb-tr-rank" style="color:var(--grey)">🥈</span><div class="lb-tr-ava diamond">🦋</div><div class="lb-tr-info"><div class="lb-tr-track">Neon Fauna</div><div class="lb-tr-artist">KAI VOSS</div></div><div class="lb-tr-fires">8.1K 🔥</div></div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--grey)">🥉</span><div class="lb-tr-ava diamond">🎭</div><div class="lb-tr-info"><div class="lb-tr-track">Deeper Still</div><div class="lb-tr-artist">ZOLA D</div></div><div class="lb-tr-fires">7.4K 🔥</div></div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--grey2)">#4</span><div class="lb-tr-ava diamond">⚡</div><div class="lb-tr-info"><div class="lb-tr-track">Pulse State</div><div class="lb-tr-artist">LUNA REX</div></div><div class="lb-tr-fires">6.8K 🔥</div></div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--grey2)">#5</span><div class="lb-tr-ava diamond">🔮</div><div class="lb-tr-info"><div class="lb-tr-track">Resonance</div><div class="lb-tr-artist">AXIOM</div></div><div class="lb-tr-fires">6.1K 🔥</div></div>
+      </div>
+      <!-- Gold -->
+      <div class="lb-col">
+        <div class="lb-col-header">
+          <div class="lb-col-icon">🥇</div>
+          <div class="lb-col-title gold">Gold</div>
+          <div class="lb-col-count">Top 5</div>
+        </div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--cyan)">🥇</span><div class="lb-tr-ava gold">🎤</div><div class="lb-tr-info"><div class="lb-tr-track">Midnight Architecture</div><div class="lb-tr-artist">KALI MASON</div></div><div class="lb-tr-fires">4.8K 🔥</div></div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--grey)">🥈</span><div class="lb-tr-ava gold">🖤</div><div class="lb-tr-info"><div class="lb-tr-track">Frequency</div><div class="lb-tr-artist">DEJA BLVCK</div></div><div class="lb-tr-fires">4.2K 🔥</div></div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--grey)">🥉</span><div class="lb-tr-ava gold">☀️</div><div class="lb-tr-info"><div class="lb-tr-track">Equinox</div><div class="lb-tr-artist">SOLAR B</div></div><div class="lb-tr-fires">3.9K 🔥</div></div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--grey2)">#4</span><div class="lb-tr-ava gold">🌊</div><div class="lb-tr-info"><div class="lb-tr-track">Siren Call</div><div class="lb-tr-artist">RAE ECHO</div></div><div class="lb-tr-fires">3.5K 🔥</div></div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--grey2)">#5</span><div class="lb-tr-ava gold">🔐</div><div class="lb-tr-info"><div class="lb-tr-track">Zero Hour</div><div class="lb-tr-artist">CRYPTON</div></div><div class="lb-tr-fires">3.1K 🔥</div></div>
+      </div>
+      <!-- Silver -->
+      <div class="lb-col">
+        <div class="lb-col-header">
+          <div class="lb-col-icon">🪨</div>
+          <div class="lb-col-title silver">Silver</div>
+          <div class="lb-col-count">Top 5</div>
+        </div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--cyan)">🥇</span><div class="lb-tr-ava silver">🌤️</div><div class="lb-tr-info"><div class="lb-tr-track">Drift Away</div><div class="lb-tr-artist">YAEL SKY</div></div><div class="lb-tr-fires">1.9K 🔥</div></div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--grey)">🥈</span><div class="lb-tr-ava silver">🏭</div><div class="lb-tr-info"><div class="lb-tr-track">Warehouse</div><div class="lb-tr-artist">TOMMY X</div></div><div class="lb-tr-fires">1.7K 🔥</div></div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--grey)">🥉</span><div class="lb-tr-ava silver">💫</div><div class="lb-tr-info"><div class="lb-tr-track">Heat Index</div><div class="lb-tr-artist">NOVA FUSE</div></div><div class="lb-tr-fires">1.5K 🔥</div></div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--grey2)">#4</span><div class="lb-tr-ava silver">🌅</div><div class="lb-tr-info"><div class="lb-tr-track">Afterglow</div><div class="lb-tr-artist">JESS VALE</div></div><div class="lb-tr-fires">1.3K 🔥</div></div>
+        <div class="lb-track-row"><span class="lb-tr-rank" style="color:var(--grey2)">#5</span><div class="lb-tr-ava silver">🔥</div><div class="lb-tr-info"><div class="lb-tr-track">Contact High</div><div class="lb-tr-artist">BLAZE K</div></div><div class="lb-tr-fires">1.1K 🔥</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     ARTIST / LABEL SPLIT
+════════════════════════════════ -->
+<section class="split-section" id="artists">
+  <div class="split-grid">
+    <div class="split-panel artist-panel reveal" id="labels">
+      <div class="split-panel-tag artist-tag">🎤 For Artists</div>
+      <div class="split-title">Your music.<br>Your terms.</div>
+      <div class="split-desc">Stop waiting for streams to go viral. Put your best 30 seconds in front of the people who can actually move your career forward.</div>
+      <ul class="split-list">
+        <li><div class="split-check artist-check">✓</div>Free tier — upload 2 tracks, no credit card</li>
+        <li><div class="split-check artist-check">✓</div>Control who can download your music</li>
+        <li><div class="split-check artist-check">✓</div>Accept or deny every contact request</li>
+        <li><div class="split-check artist-check">✓</div>Heat Score tracks your momentum automatically</li>
+        <li><div class="split-check artist-check">✓</div>Per-genre leaderboards for your scene</li>
+        <li><div class="split-check artist-check">✓</div>Press shot, bio, and social link hub</li>
+        <li><div class="split-check artist-check">✓</div>Upload Original, Radio Edit, or Extended Mix</li>
+      </ul>
+      <button class="btn-artist" onclick="openSignup('artist')">Start as Artist →</button>
+    </div>
+
+    <div class="split-panel label-panel reveal">
+      <div class="split-panel-tag label-tag">🏷️ For Labels & A&Rs</div>
+      <div class="split-title">Find talent<br>before it blows.</div>
+      <div class="split-desc">Your next signing is already on SwipeSound. Advanced filters + Heat Score data means you spend time listening, not searching.</div>
+      <ul class="split-list">
+        <li><div class="split-check label-check">✓</div>Advanced genre, BPM, and region filters</li>
+        <li><div class="split-check label-check">✓</div>Heat Score analytics and trend data</li>
+        <li><div class="split-check label-check">✓</div>Verified A&R badge to stand out to artists</li>
+        <li><div class="split-check label-check">✓</div>Download full tracks (artist-permissioned)</li>
+        <li><div class="split-check label-check">✓</div>Roster management and team accounts</li>
+        <li><div class="split-check label-check">✓</div>Priority placement in contact requests</li>
+        <li><div class="split-check label-check">✓</div>Sync licensing pipeline (coming soon)</div></li>
+      </ul>
+      <button class="btn-label" onclick="openSignup('label')">Start as Label →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     PRICING
+════════════════════════════════ -->
+<section class="pricing-section" id="pricing">
+  <div class="section-header reveal" style="max-width:1200px;margin:0 auto 56px;">
+    <div class="section-label label">Transparent Pricing</div>
+    <h2 class="section-title">Grow at your<br><span class="accent">own pace</span></h2>
+    <p class="section-sub">Start free, upgrade when you're ready. No hidden fees, no algorithm games.</p>
+  </div>
+
+  <div class="pricing-grid">
+    <!-- Free -->
+    <div class="price-card reveal">
+      <div class="price-tier">Artist</div>
+      <div class="price-name">Free</div>
+      <div class="price-amount"><div class="price-num">$0</div><div class="price-per">/mo</div></div>
+      <div class="price-desc">Try it out. Get your first fires. No credit card needed.</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="pf-check">✓</span>2 track uploads</li>
+        <li><span class="pf-check">✓</span>30s clip trimmer</li>
+        <li><span class="pf-check">✓</span>Basic profile + bio</li>
+        <li><span class="pf-check">✓</span>Leaderboard visibility</li>
+        <li><span class="pf-check">✓</span>Fire / be fired on</li>
+        <li><span class="pf-dash">–</span><span style="color:var(--grey)">Download controls</span></li>
+        <li><span class="pf-dash">–</span><span style="color:var(--grey)">Analytics</span></li>
+      </ul>
+      <button class="btn-price outline" onclick="openSignup('artist')">Get Started Free</button>
+    </div>
+
+    <!-- Artist Pro -->
+    <div class="price-card featured reveal">
+      <div class="price-badge">Most Popular</div>
+      <div class="price-tier">Artist</div>
+      <div class="price-name">Artist Pro</div>
+      <div class="price-amount"><div class="price-num">$9</div><div class="price-per">/mo</div></div>
+      <div class="price-desc">Everything you need to get discovered and stay ahead.</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="pf-check">✓</span>Unlimited track uploads</li>
+        <li><span class="pf-check">✓</span>Advanced clip trimmer</li>
+        <li><span class="pf-check">✓</span>Full profile + press shot</li>
+        <li><span class="pf-check">✓</span>Download access controls</li>
+        <li><span class="pf-check">✓</span>Heat Score analytics</li>
+        <li><span class="pf-check">✓</span>Priority in A&R search</li>
+        <li><span class="pf-check">✓</span>Radio Edit + Extended Mix uploads</li>
+      </ul>
+      <button class="btn-price primary" onclick="openSignup('artist')">Start Artist Pro</button>
+    </div>
+
+    <!-- Label -->
+    <div class="price-card reveal">
+      <div class="price-tier">Label / A&R</div>
+      <div class="price-name">Discovery</div>
+      <div class="price-amount"><div class="price-num">$49</div><div class="price-per">/mo</div></div>
+      <div class="price-desc">For active A&Rs and indie labels building their roster.</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="pf-check">✓</span>Full artist database access</li>
+        <li><span class="pf-check">✓</span>Advanced filters (BPM, genre, region)</li>
+        <li><span class="pf-check">✓</span>Verified A&R badge</li>
+        <li><span class="pf-check">✓</span>Track full downloads (permissioned)</li>
+        <li><span class="pf-check">✓</span>Heat Score trend data</li>
+        <li><span class="pf-check">✓</span>5 team seats</li>
+        <li><span class="pf-check">✓</span>Priority contact requests</li>
+      </ul>
+      <button class="btn-price outline" onclick="openSignup('label')">Start as Label</button>
+    </div>
+
+    <!-- Enterprise -->
+    <div class="price-card reveal">
+      <div class="price-tier">Major Label</div>
+      <div class="price-name">Enterprise</div>
+      <div class="price-amount"><div class="price-num" style="font-size:32px;letter-spacing:-1px">Custom</div></div>
+      <div class="price-desc" style="margin-top:8px">For major labels, management companies, and sync agencies.</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="pf-check">✓</span>Everything in Discovery</li>
+        <li><span class="pf-check">✓</span>Unlimited team seats</li>
+        <li><span class="pf-check">✓</span>Custom Heat Score reports</li>
+        <li><span class="pf-check">✓</span>Sync licensing pipeline</li>
+        <li><span class="pf-check">✓</span>API access</li>
+        <li><span class="pf-check">✓</span>Dedicated account manager</li>
+        <li><span class="pf-check">✓</span>White-label options</li>
+      </ul>
+      <button class="btn-price outline" onclick="showToast('📩 Sales team will reach out shortly!')">Contact Sales</button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     TESTIMONIALS
+════════════════════════════════ -->
+<section class="testimonial-section">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label label">Industry Voices</div>
+      <h2 class="section-title">Heard from the <span class="accent">inside</span></h2>
+    </div>
+    <div class="testimonial-grid">
+      <div class="testimonial-card reveal">
+        <div class="testi-quote">SwipeSound is the first platform where I feel like my music actually lands in front of someone who matters. Signed to an indie label after three weeks.</div>
+        <div class="testi-author">
+          <div class="testi-ava">🎤</div>
+          <div><div class="testi-name">Marcus J.</div><div class="testi-role">Deep House Artist · LA</div></div>
+          <div class="testi-badge artist"><span>Artist</span></div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal">
+        <div class="testi-quote">I discovered three artists in one afternoon that I would have never found on any other platform. The Heat Score filter alone saves me hours every week.</div>
+        <div class="testi-author">
+          <div class="testi-ava">🏷️</div>
+          <div><div class="testi-name">Priya K.</div><div class="testi-role">A&R Director · Indie Label</div></div>
+          <div class="testi-badge label"><span>Label</span></div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal">
+        <div class="testi-quote">The BPM filter and DJ download access is a game changer for crate digging. Found three unreleased tracks that closed my last Insomniac set perfectly.</div>
+        <div class="testi-author">
+          <div class="testi-ava">🎧</div>
+          <div><div class="testi-name">DJ Wavelength</div><div class="testi-role">Resident DJ · Miami</div></div>
+          <div class="testi-badge artist"><span>DJ</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     CTA STRIP
+════════════════════════════════ -->
+<div class="cta-strip reveal">
+  <div class="cta-glow"></div>
+  <div class="cta-text">
+    <div class="cta-title">Ready to be heard?</div>
+    <div class="cta-sub">Join 12,000+ artists and 340 labels already on SwipeSound.</div>
+  </div>
+  <div class="cta-btns">
+    <button class="btn-hero-artist" onclick="openSignup('artist')"><span>🎤</span> Start as Artist</button>
+    <button class="btn-hero-label" onclick="openSignup('label')"><span>🏷️</span> Start as Label</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     FOOTER
+════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <div class="nav-logo-mark" style="width:28px;height:28px;border-radius:8px;">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:#000;"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        </div>
+        Swipe<span>Sound</span>
+      </div>
+      <div class="footer-tagline">Where unsigned artists meet the labels, A&Rs, and DJs who are actually looking. No algorithm. Pure signal.</div>
+      <div class="footer-socials">
+        <div class="social-btn">𝕏</div>
+        <div class="social-btn">in</div>
+        <div class="social-btn">▶</div>
+        <div class="social-btn">📷</div>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#charts">Leaderboard</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Changelog</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Industry</h4>
+      <ul>
+        <li><a href="#artists">For Artists</a></li>
+        <li><a href="#labels">For Labels</a></li>
+        <li><a href="#">For DJs</a></li>
+        <li><a href="#">For Managers</a></li>
+        <li><a href="#">Sync Licensing</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Press Kit</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Mobile App</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 SwipeSound. All rights reserved.</div>
+    <div class="footer-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Cookie Policy</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ════════════════════════════════
+     LOGIN MODAL
+════════════════════════════════ -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-logo">Swipe<span>Sound</span></div>
+      <button class="modal-x" onclick="closeModal('loginModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-title">Welcome back</div>
+      <div class="modal-sub">Sign in to your SwipeSound account</div>
+
+      <button class="oauth-btn" onclick="showToast('🔗 Connecting with Google...')">
+        <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
+        Continue with Google
+      </button>
+      <button class="oauth-btn" onclick="showToast('🔗 Connecting with Apple...')">
+        <svg width="16" height="16" viewBox="0 0 814 1000" fill="currentColor"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 443.9 0 315.7 0 194.7 0 87 46 31.5 92.5 31.5c77.5 0 140.4 52.4 157.9 52.4 15.2 0 91.8-55.6 174.4-55.6z"/></svg>
+        Continue with Apple
+      </button>
+
+      <div class="form-divider">or sign in with email</div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" placeholder="••••••••">
+      </div>
+      <div style="text-align:right;margin-bottom:18px;margin-top:-6px;">
+        <a href="#" style="font-size:12px;color:var(--grey);transition:color 0.2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--grey)'">Forgot password?</a>
+      </div>
+
+      <button class="btn-auth" onclick="handleLogin()">Sign In</button>
+      <div class="auth-footer-text">Don't have an account? <a onclick="switchToSignup()">Create one free →</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     SIGNUP MODAL
+════════════════════════════════ -->
+<div class="modal-overlay" id="signupModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-logo">Swipe<span>Sound</span></div>
+      <button class="modal-x" onclick="closeModal('signupModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-title" id="signupTitle">Create your account</div>
+      <div class="modal-sub">Join the music industry's newest discovery platform</div>
+
+      <div class="acct-type-row">
+        <div class="acct-type sel" id="artistType" onclick="selectAcctType('artist')">
+          <div class="acct-type-icon">🎤</div>
+          <div class="acct-type-name">Artist</div>
+          <div class="acct-type-desc">Upload tracks, get discovered</div>
+          <div class="acct-check"></div>
+        </div>
+        <div class="acct-type label-type" id="labelType" onclick="selectAcctType('label')">
+          <div class="acct-type-icon">🏷️</div>
+          <div class="acct-type-name">Label / A&R</div>
+          <div class="acct-type-desc">Find & sign talent</div>
+          <div class="acct-check"></div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input class="form-input" type="text" placeholder="Kali">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name / Label</label>
+          <input class="form-input" type="text" id="lastNameLabel" placeholder="Mason">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" placeholder="your@email.com">
+      </div>
+      <div class="form-group" id="artistNameGroup">
+        <label class="form-label">Artist Name / Stage Name</label>
+        <input class="form-input" type="text" placeholder="e.g. KALI MASON">
+      </div>
+      <div class="form-group" id="locationGroup">
+        <label class="form-label">City, State</label>
+        <input class="form-input" type="text" placeholder="Los Angeles, CA">
+      </div>
+
+      <!-- Genre selector (artist) -->
+      <div class="form-group" id="genreGroup">
+        <label class="form-label">Primary Genres (pick up to 3)</label>
+        <div class="genre-select-wrap">
+          <div class="genre-sel-pill on" onclick="toggleGenre(this)">Deep House</div>
+          <div class="genre-sel-pill" onclick="toggleGenre(this)">House</div>
+          <div class="genre-sel-pill" onclick="toggleGenre(this)">Techno</div>
+          <div class="genre-sel-pill" onclick="toggleGenre(this)">Hip Hop</div>
+          <div class="genre-sel-pill" onclick="toggleGenre(this)">R&B</div>
+          <div class="genre-sel-pill" onclick="toggleGenre(this)">Afrobeats</div>
+          <div class="genre-sel-pill" onclick="toggleGenre(this)">Trap</div>
+          <div class="genre-sel-pill" onclick="toggleGenre(this)">Pop</div>
+          <div class="genre-sel-pill" onclick="toggleGenre(this)">Electronic</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" placeholder="Min 8 characters" oninput="updatePwdStrength(this.value)">
+        <div class="pwd-strength"><div class="pwd-strength-bar" id="pwdBar" style="width:0%;background:var(--red)"></div></div>
+      </div>
+
+      <button class="btn-auth" id="signupBtn" onclick="handleSignup()">Create Account Free →</button>
+      <div class="auth-footer-text">Already have an account? <a onclick="switchToLogin()">Sign in →</a></div>
+      <div style="font-size:11px;color:var(--grey);text-align:center;margin-top:12px;line-height:1.5;">By creating an account you agree to our <a href="#" style="color:var(--grey);text-decoration:underline;">Terms of Service</a> and <a href="#" style="color:var(--grey);text-decoration:underline;">Privacy Policy</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card2);border:1px solid var(--border2);border-radius:100px;padding:12px 20px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;opacity:0;transition:all 0.3s;white-space:nowrap;z-index:600;box-shadow:0 8px 32px rgba(0,0,0,0.6);pointer-events:none;">
+  <div style="width:5px;height:5px;border-radius:50%;background:var(--cyan);box-shadow:0 0 7px var(--cyan);"></div>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+// ─── HERO CANVAS ──────────────────────────────
+const HC = document.getElementById('heroCanvas');
+const hctx = HC.getContext('2d');
+let HT = 0;
+function resizeHero() { HC.width = HC.offsetWidth; HC.height = HC.offsetHeight; }
+function heroLoop() {
+  requestAnimationFrame(heroLoop);
+  HT += 0.006;
+  const W = HC.width, H = HC.height, cx = W/2, cy = H/2;
+  hctx.clearRect(0,0,W,H);
+  // Deep background rings
+  const maxR = Math.min(W,H)*0.55;
+  for(let i=0;i<22;i++){
+    const f=i/22, r=maxR*Math.pow(f,0.58);
+    const ry=r*(0.42+0.12*Math.sin(HT*0.22+i*0.2));
+    const sp=HT*0.06;
+    const br=i%2===0?180:10;
+    hctx.beginPath();
+    hctx.ellipse(cx,cy,r,ry,sp+i*0.008,0,Math.PI*2);
+    hctx.strokeStyle=`rgba(${br},${br},${Math.min(255,br+30)},${0.15+f*0.35})`;
+    hctx.lineWidth=Math.max(0.4,(1-f)*3);hctx.stroke();
+  }
+  // Cyan glow pulses
+  for(let d=0;d<6;d++){
+    const a=(d/6)*Math.PI*2+HT*0.18;
+    const dx=cx+Math.cos(a)*maxR*0.75,dy=cy+Math.sin(a)*maxR*0.38;
+    const p=0.3+0.4*Math.sin(HT*1.4+d);
+    const ds=3+p*6;
+    const g=hctx.createRadialGradient(dx,dy,0,dx,dy,ds*2);
+    g.addColorStop(0,`rgba(0,229,255,${0.3*p})`);g.addColorStop(1,'transparent');
+    hctx.beginPath();hctx.arc(dx,dy,ds*2,0,Math.PI*2);hctx.fillStyle=g;hctx.fill();
+  }
+}
+resizeHero();
+heroLoop();
+window.addEventListener('resize', resizeHero);
+
+// ─── HOW IT WORKS TABS ───────────────────────
+function switchHow(btn, id) {
+  document.querySelectorAll('.how-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.how-steps').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ─── MODALS ───────────────────────────────────
+function openLogin() { document.getElementById('loginModal').classList.add('open'); }
+function openSignup(type) {
+  document.getElementById('signupModal').classList.add('open');
+  if(type) selectAcctType(type);
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function switchToSignup() { closeModal('loginModal'); openSignup(); }
+function switchToLogin() { closeModal('signupModal'); openLogin(); }
+
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+});
+
+// ─── ACCOUNT TYPE ─────────────────────────────
+let selectedAcctType = 'artist';
+function selectAcctType(type) {
+  selectedAcctType = type;
+  document.getElementById('artistType').classList.toggle('sel', type==='artist');
+  document.getElementById('labelType').classList.toggle('sel', type==='label');
+  document.getElementById('artistType').classList.remove('label-type');
+  document.getElementById('labelType').classList.remove('label-type');
+  if(type==='label') document.getElementById('labelType').classList.add('label-type');
+  document.getElementById('artistNameGroup').style.display = type==='artist'?'block':'none';
+  document.getElementById('genreGroup').style.display = type==='artist'?'block':'none';
+  document.getElementById('lastNameLabel').placeholder = type==='label'?'Label / Company Name':'Mason';
+  const btn = document.getElementById('signupBtn');
+  btn.className = 'btn-auth' + (type==='label'?' gold':'');
+  btn.textContent = type==='label'?'Start Finding Talent →':'Create Account Free →';
+}
+
+// ─── GENRE PILLS ──────────────────────────────
+function toggleGenre(el) {
+  const selected = document.querySelectorAll('.genre-sel-pill.on').length;
+  if(el.classList.contains('on')) { el.classList.remove('on'); }
+  else if(selected < 3) { el.classList.add('on'); }
+  else { showToast('Max 3 genres. Deselect one first.'); }
+}
+
+// ─── PASSWORD STRENGTH ────────────────────────
+function updatePwdStrength(val) {
+  const bar = document.getElementById('pwdBar');
+  let score = 0;
+  if(val.length>=8) score++;
+  if(/[A-Z]/.test(val)) score++;
+  if(/[0-9]/.test(val)) score++;
+  if(/[^a-zA-Z0-9]/.test(val)) score++;
+  const pct = score*25;
+  const colors = ['','var(--red)','var(--gold)','var(--gold)','var(--cyan)'];
+  bar.style.width = pct+'%';
+  bar.style.background = colors[score]||'var(--red)';
+}
+
+// ─── AUTH HANDLERS ────────────────────────────
+function handleLogin() {
+  showToast('✓ Signed in successfully! Redirecting...');
+  setTimeout(()=>closeModal('loginModal'),1200);
+}
+function handleSignup() {
+  const type = selectedAcctType==='label'?'Label':'Artist';
+  showToast(`🎉 Welcome to SwipeSound! ${type} account created.`);
+  setTimeout(()=>closeModal('signupModal'),1400);
+}
+
+// ─── SCROLL REVEAL ────────────────────────────
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}});
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// ─── TOAST ────────────────────────────────────
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},2800);
+}
+
+// ─── NAV ACTIVE ON SCROLL ─────────────────────
+window.addEventListener('scroll',()=>{
+  const nav=document.querySelector('.nav');
+  nav.style.borderBottomColor=window.scrollY>60?'var(--border2)':'var(--border)';
+});
+</script>
+</body>
+</html>
